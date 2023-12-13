@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Environment
+.venv
+
+
+#log file maybe
+*.log
+local_config.py
+.idea/
+.vscode/
