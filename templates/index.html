@@ -1,0 +1,35 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- flash messeges -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="flash-{{ category }}">
+      {{ message }}
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  <div class="index_wrapper">
+    <div class="index_text">
+      <h1>Welcome 
+        <br>Astronaut!</h1>
+      <p>Embark on an interstellar adventure with my Cosmic User Portal. 
+        <br>Experience seamless exploration, swift access, and cosmic security. 
+        <br>Click '<b>Register</b>' or '<b>Login</b>' to begin your space odyssey. 
+        <br>Simplifying code across the galaxy. 👨‍🚀🌌</p>
+    </div>
+
+    <div class="button-container">
+      <img src="/static/images/Asset-1.png" alt="boy-with-signing-form">
+      <!--
+        <a href="{{ url_for('register') }}" class="btn">Register</a>
+        <a href="{{ url_for('login') }}" class="btn">Login</a>
+      -->
+      </div>
+  </div>
+{% endblock %}

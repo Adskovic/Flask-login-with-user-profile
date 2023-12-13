@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact{% endblock %}
+
+{% block content %}
+<body>
+<!-- flash messeges -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-{{ category }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
+    <div class="wrapper">
+        <div class="contact_text">
+            <h1>Hello there!👋</h1>
+                <p>
+                    You can reach me via email: <b>adskyy@gmail.com</b>
+                    <br>
+                    or you can write me a message on my social media.
+                </p>
+                <div class="social-buttons">
+                    <a href="https://github.com" target="_blank">
+                        <i class='bx bxl-github' style='color:#ffffff' ></i>             
+                    <a href="https://www.linkedin.com" target="_blank">
+                        <i class='bx bxl-linkedin-square' style='color:#ffffff' ></i>           
+                    <a href="https://www.instagram.com/">
+                        <i class='bx bxl-instagram-alt' style='color:#ffffff' ></i>
+                </div>                
+        </div>
+    </div>
+</body>
+{% endblock %}

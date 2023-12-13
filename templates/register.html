@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block content %}
+
+<!-- Registration form -->
+<div class="wrapper">
+    <form method="POST" action="{{ url_for('register') }}">
+        <h1>Register</h1>
+        
+    <!-- flash messeges -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {{ form.csrf_token }}
+        <div class="input-box">
+            <i class='bx bxs-user-circle'></i>
+            {{ form.name(placeholder="Username") }}
+            
+        </div>
+        <div class="input-box">
+            {{ form.email(placeholder="@Email") }}
+
+            <i class='bx bxs-envelope'></i>
+        </div>
+        <div class="input-box">
+            {{ form.password(placeholder="Password") }}
+
+            <i class='bx bxs-lock'></i>
+        </div>
+        <div class="input-box">
+            {{ form.password2(placeholder="Repeat Password") }}
+            <i class='bx bxs-lock'></i>
+        </div>
+
+        <hr class="hr gradient">
+        
+        <br>
+        <br>
+
+        {{ form.submit(class="btn") }}
+
+        <div class="register-link">
+            <p>Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+            
+        </div>
+    </form>
+</div>
+{% endblock %}

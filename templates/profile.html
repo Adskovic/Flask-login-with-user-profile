@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}{{current_user.username}} Profile{% endblock %}
+
+{% block content %}
+<div class="wrapper">
+    <!-- flash messeges -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-{{ category }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="profile-header">
+        <div class="profile-picture-container">
+            <!-- Profile picture -->
+            <img src="{{ current_user.profile_picture }}" alt="Profile Picture">
+        </div>
+    </div>
+
+        <!-- Profile information -->
+    <div class="profile-section">
+        <h2>Profile Information</h2>
+        <p><strong>Username:</strong> {{ current_user.username }}</p>
+        <p><strong>Email:</strong> {{ current_user.email }}</p>
+    </div>
+
+    <div class="profile-form" style="display: none;">
+        <h2>Edit Profile</h2>
+        <form action="{{ url_for('profile') }}" method="post">
+            {{ form.hidden_tag() }}
+            <div class="input-box">
+                <label for="username">Username:</label>
+                {{ form.username }}
+            </div>
+            <div class="input-box">
+                <label for="email">Email:</label>
+                {{ form.email }}
+            </div>
+            <div class="input-box">
+                <label for="password">Password:</label>
+                {{ form.password }}
+            </div>
+            <div class="input-box">
+                <label for="profile_picture">Profile Picture:</label>
+                {{ form.profile_picture(class="form-control", id="profile-picture-select") }}
+            </div>
+            <div class="input-box">
+                <button type="submit">Save Changes</button>
+                <button type="cancel" onclick="cancelEditing()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <button class="edit-btn" onclick="startEditing()">Edit Profile</button>
+</div>
+
+<script>
+    function startEditing() {
+        document.querySelector('.profile-section').style.display = 'none';
+        document.querySelector('.profile-form').style.display = 'block';
+        document.querySelector('.edit-btn').style.display = 'none';
+    }
+
+    function cancelEditing() {
+        document.querySelector('.profile-section').style.display = 'block';
+        document.querySelector('.profile-form').style.display = 'none';
+        document.querySelector('.edit-btn').style.display = 'block';
+    }
+</script>
+{% endblock %}
