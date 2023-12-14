@@ -6,13 +6,13 @@
 <div class="wrapper">
     <!-- flash messeges -->
     {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="flash-{{ category }}">
-        {{ message }}
-    </div>
-    {% endfor %}
-    {% endif %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
     {% endwith %}
 
     <div class="profile-header">
@@ -51,10 +51,10 @@
             </div>
             <div class="input-box">
                 <button type="submit">Save Changes</button>
-                <button type="cancel" onclick="cancelEditing()">Cancel</button>
+                <button type="button" onclick="cancelEditing()">Cancel</button>
             </div>
         </form>
-    </div>
+    </div>:loading
 
     <button class="edit-btn" onclick="startEditing()">Edit Profile</button>
 </div>

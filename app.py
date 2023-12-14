@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect, flash
+from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -174,8 +174,11 @@ def profile():
         if new_profile_picture:
             current_user.profile_picture = new_profile_picture
 
-
-        db.session.commit()
+        if 'cancel' in request.form:
+            pass
+        else:
+            db.session.commit()
+        
 
         flash('Profile updated successfully', 'success')
         return redirect(url_for('profile'))
