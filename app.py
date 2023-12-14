@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from forms import RegisterForm, LoginForm, EditProfileForm
+from forms import RegisterForm, LoginForm, EditProfileForm, ForgotForm
 from config import secret_key
 
 app = Flask(__name__)
@@ -186,9 +186,12 @@ def profile():
     return render_template('profile.html', form=form)
 
 # TODO: Add forgot route and style it in forgot.html
-@app.route('/forgot_password')
+@app.route('/forgot_password', methods=["GET", "POST"])
 def forgot():
-    return render_template("forgot.html")
+    form = ForgotForm()
+    if form.validate_on_submit():
+        pass
+    return render_template("forgot.html", form=form)
 
 
 

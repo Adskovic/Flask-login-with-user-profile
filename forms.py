@@ -39,10 +39,13 @@ class EditProfileForm(FlaskForm):
     ])
     submit = SubmitField('Save Changes')
 
-    # TODO: Zrobić działający form do resetowania hasła i form do zarequestowania resetowania
 
 class ForgotForm(FlaskForm):
-    pass
+    email = EmailField('Email', validators=[DataRequired()])
+    submit = SubmitField('Reset Password')
 
+
+# TODO: Make working reset password form
+    
 class ResetPasswordForm(FlaskForm):
     pass
