@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Login page{% endblock %}
+{% block title %}Forgot password{% endblock %}
 
 {% block content %}
 <div class="wrapper">
@@ -14,8 +14,8 @@
         {% endif %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('forgot') }}" >
-        <h1>Forgot password</h1>
+    <form method="POST" action="{{ url_for('reset_request') }}" >
+        <h1>Request password reset</h1>
         <br>
         <p>Please enter your email address and we will send you a link to reset your password</p>
 

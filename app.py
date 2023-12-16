@@ -2,8 +2,14 @@ from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from forms import RegisterForm, LoginForm, EditProfileForm, ForgotForm
+from forms import RegisterForm, LoginForm, EditProfileForm, ForgotForm, ResetPasswordForm
 from config import secret_key
+from itsdangerous import Serializer
+
+#TODO: Fix flask-mail import
+# from flask_mail import Mail
+import os
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secret_key
@@ -15,6 +21,15 @@ db = SQLAlchemy()
 db.init_app(app)
 
 
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
+app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
+# mail = Mail(app)
+
+
+
 # Configure tables
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -23,6 +38,22 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(50))
     profile_picture = db.Column(db.String(255), default="/static/images/astro.png")
+
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.id}).decode('utf-8')
+    
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        
+        return User.query.get(user_id) 
+    #try db.session.execute(db.select(User).where(User.id == id))
 
 
 # Creating tables
@@ -185,13 +216,38 @@ def profile():
 
     return render_template('profile.html', form=form)
 
-# TODO: Add forgot route and style it in forgot.html
+
+def send_reset_email(user):
+    pass
+
+#TODO: Complete work with password reset routes
 @app.route('/forgot_password', methods=["GET", "POST"])
-def forgot():
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    
     form = ForgotForm()
     if form.validate_on_submit():
-        pass
+        email = form.email.data
+        result = db.session.execute(db.select(User).where(User.email == email))
+        user = result.scalar()
+        send_reset_email(user)
+        flash("An email has been sent", category="success")
+        return redirect(url_for('login'))
     return render_template("forgot.html", form=form)
+
+
+@app.route('/forgot_password/<token>', methods=["GET", "POST"])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    user = User.verify_reset_token(token)
+
+    if not user:
+        flash("That is an invalid or expired token", category="danger")
+        return redirect(url_for('reset_request'))
+    form = ResetPasswordForm()
+    return render_template("reset-password.html", form=form)
 
 
 
