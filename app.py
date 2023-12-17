@@ -5,28 +5,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegisterForm, LoginForm, EditProfileForm, ForgotForm, ResetPasswordForm
 from config import secret_key
 from itsdangerous import Serializer
-
-#TODO: Fix flask-mail import
-# from flask_mail import Mail
+from flask_mail import Mail, Message
 import os
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = secret_key
-
-
-# Connect to db
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
-db = SQLAlchemy()
-db.init_app(app)
-
-
+app.config['SECRET_KEY'] = '005555533333332423563456456457567567'
+# Mail config
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
-# mail = Mail(app)
+
+# Connect to db
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
+db = SQLAlchemy()
+db.init_app(app)
+# Initializing flask-mail
+mail = Mail(app)
 
 
 
@@ -55,6 +52,7 @@ class User(UserMixin, db.Model):
         return User.query.get(user_id) 
     #try db.session.execute(db.select(User).where(User.id == id))
 
+print(User.get_reset_token)
 
 # Creating tables
 with app.app_context():
@@ -218,7 +216,18 @@ def profile():
 
 
 def send_reset_email(user):
-    pass
+    token = user.get_reset_token()
+    msg = Message(
+        "Password reset request",
+        sender="noreply@email.com",
+        recipients=[user.email]
+    )
+    msg.body = f'''To reset your password please click on the following link:
+{url_for('reset_token', token=token, _external=True)}
+
+If you did not request this then simply ignore this email and no changes will be made.
+'''
+    mail.send(msg)
 
 #TODO: Complete work with password reset routes
 @app.route('/forgot_password', methods=["GET", "POST"])
@@ -246,7 +255,22 @@ def reset_token(token):
     if not user:
         flash("That is an invalid or expired token", category="danger")
         return redirect(url_for('reset_request'))
+    
     form = ResetPasswordForm()
+    if form.validate_on_submit():
+
+        # Hashing and salting password
+        hash_and_salted_password = generate_password_hash(
+            form.password.data,
+            method="pbkdf2:sha256",
+            salt_length=8
+        )
+
+        # Creating new password
+        user.password = hash_and_salted_password
+        db.session.commit()
+        flash("Your password has been changed. You are now able to log in.", category="success")
+        return render_template(url_for('login'))
     return render_template("reset-password.html", form=form)
 
 
