@@ -3,14 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegisterForm, LoginForm, EditProfileForm, ForgotForm, ResetPasswordForm
-from config import secret_key
-from itsdangerous import Serializer
+
+from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask_mail import Mail, Message
 import os
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '005555533333332423563456456457567567'
+app.config['SECRET_KEY'] = 'your_app_super_secret_key'
 # Mail config
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 587
@@ -38,7 +38,7 @@ class User(UserMixin, db.Model):
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
-        return s.dumps({'user_id': self.id}).decode('utf-8')
+        return s.dumps({'user_id': self.id})
     
 
     @staticmethod
@@ -185,19 +185,18 @@ def profile():
         if new_username:
             current_user.username = new_username
         
-        # Warunki sprawdzające, czy new_email nie jest puste, poza blokiem validate_on_submit
+        # Checking if new email field is not empty
         if new_email:
             current_user.email = new_email
 
 
         if new_password:
-            # Użyj funkcji generate_password_hash, aby uzyskać zahashowane hasło
+            # Password hashing
             hashed_password = generate_password_hash(
                 new_password,
                 method="pbkdf2:sha256",
                 salt_length=8
             )
-            # Przypisz zahashowane hasło do pola password
             current_user.password = hashed_password
 
         if new_profile_picture:
@@ -216,21 +215,23 @@ def profile():
 
 
 def send_reset_email(user):
-    token = user.get_reset_token()
+    s = Serializer(app.config['SECRET_KEY'])
+    token = s.dumps({'user_id': user.id})
     msg = Message(
         "Password reset request",
-        sender="noreply@email.com",
+        sender="noreply@gmail.com",
         recipients=[user.email]
     )
+    reset_url = url_for('reset_token', token=token, _external=True)
     msg.body = f'''To reset your password please click on the following link:
-{url_for('reset_token', token=token, _external=True)}
+{reset_url}
 
 If you did not request this then simply ignore this email and no changes will be made.
 '''
     mail.send(msg)
 
 #TODO: Complete work with password reset routes
-@app.route('/forgot_password', methods=["GET", "POST"])
+@app.route('/reset_password', methods=["GET", "POST"])
 def reset_request():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
@@ -246,7 +247,7 @@ def reset_request():
     return render_template("forgot.html", form=form)
 
 
-@app.route('/forgot_password/<token>', methods=["GET", "POST"])
+@app.route('/reset_password/<token>', methods=["GET", "POST"])
 def reset_token(token):
     if current_user.is_authenticated:
         return redirect(url_for('home'))
@@ -270,7 +271,7 @@ def reset_token(token):
         user.password = hash_and_salted_password
         db.session.commit()
         flash("Your password has been changed. You are now able to log in.", category="success")
-        return render_template(url_for('login'))
+        return redirect(url_for('login'))
     return render_template("reset-password.html", form=form)
 
 
